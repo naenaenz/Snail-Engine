@@ -50,23 +50,25 @@ def render():
       object.render()
   pygame.display.update()
 
-pygame.init()
-screen = pygame.display.set_mode((640, 480))
-objects.append(spriteObject("test",(100,100),pygame.image.load("test.jpeg").convert()))
+def engineMain():
+    pygame.init()
+    screen = pygame.display.set_mode((640, 480))
+    objects.append(spriteObject("test",(100,100),pygame.image.load("test.jpeg").convert()))
 
-print(pygame.key.get_pressed())
+    print(pygame.key.get_pressed())
 
-while True:
-    render()
-    for event in pygame.event.get():
-        print(event, event.type)
-        print(K_ESCAPE,QUIT,KEYDOWN)
-        # Did the user hit a key?
-        if event.type == KEYDOWN:
-            # Was it the Escape key? If so, stop the loop.
-            if event.key == K_ESCAPE:
+    while True:
+        render()
+        for event in pygame.event.get():
+            print(event, event.type)
+            print(K_ESCAPE,QUIT,KEYDOWN)
+            # Did the user hit a key?
+            if event.type == KEYDOWN:
+                # Was it the Escape key? If so, quit.
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+
+            # Did the user click the window close button? If so, quit.
+            elif event.type == QUIT:
                 pygame.quit()
-
-        # Did the user click the window close button? If so, stop the loop.
-        elif event.type == QUIT:
-            pygame.quit()
+        pygame.time.delay(16)
