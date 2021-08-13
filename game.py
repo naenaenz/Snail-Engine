@@ -83,6 +83,7 @@ def main():
     while True:
         events = handleEvents((K_UP,K_LEFT,K_DOWN,K_RIGHT))
         engineMain()
+        print(pygame.key.get_pressed())
         if events[0]:
             objects[getObject("test")].offset[1]+=5
         if events[1]:
