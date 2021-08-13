@@ -50,27 +50,23 @@ def render():
             object.render()
     pygame.display.update()
 
-def handleEvents():
-    events = [False, False, False, False]
+def handleEvents(keys):
+    events = [False for i in keys]
     for event in pygame.event.get():
         # Did the user hit a key?
         if event.type == KEYDOWN:
             # Was it the Escape key? If so, quit.
             if event.key == K_ESCAPE:
                 pygame.quit()
-            elif event.key == K_UP:
-                events[0] = True
-            elif event.key == K_LEFT:
-                events[1] = True
-            elif event.key == K_DOWN:
-                events[2] = True
-            elif event.key == K_RIGHT:
-                events[3] = True
+            for keyID in range(len(keys)):
+                if event.key == keys[keyID]:
+                    events[keyID] = True
         # Did the user click the window close button? If so, quit.
         elif event.type == QUIT:
             pygame.quit()
     return events
 screen = ""
+
 def init():
     global screen
     global objects
@@ -85,7 +81,7 @@ def engineMain():
 def main():
     init()
     while True:
-        events = handleEvents()
+        events = handleEvents((K_UP,K_LEFT,K_DOWN,K_RIGHT))
         engineMain()
         if events[0]:
             objects[getObject("test")].offset[1]+=5
