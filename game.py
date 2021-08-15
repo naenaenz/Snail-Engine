@@ -65,6 +65,10 @@ def handleEvents(keys):
         elif event.type == QUIT:
             pygame.quit()
     return events
+
+def keyPressed(key):
+    return(pygame.key.get_pressed()[key])
+
 screen = ""
 
 def init():
@@ -81,15 +85,14 @@ def engineMain():
 def main():
     init()
     while True:
-        events = handleEvents((K_UP,K_LEFT,K_DOWN,K_RIGHT))
+        events = handleEvents(())
         engineMain()
-        print(pygame.key.get_pressed())
-        if events[0]:
+        if keyPressed(K_UP):
             objects[getObject("test")].offset[1]+=5
-        if events[1]:
+        if keyPressed(K_LEFT):
             objects[getObject("test")].offset[0]-=5
-        if events[2]:
+        if keyPressed(K_DOWN): 
             objects[getObject("test")].offset[1]-=5 
-        if events[3]:
+        if keyPressed(K_RIGHT):
             objects[getObject("test")].offset[0]+=5 
 main()
