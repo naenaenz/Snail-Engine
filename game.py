@@ -5,8 +5,10 @@ from pygame.locals import (
     K_LEFT,
     K_RIGHT,
     K_ESCAPE,
+    K_q,
+    K_e,
     KEYDOWN,
-    QUIT,
+    QUIT
 )
 
 
@@ -19,8 +21,9 @@ def getObject(id):
     return -1
 
 class gameObject():
-    def __init__(self,id,offset,layer=1,parent="world"):
+    def __init__(self,id,rotation,offset,layer=1,parent="world"):
         self.id = id
+        self.rotation = rotation
         self.layer = layer
         self.parent = parent
         self.offset = offset
@@ -37,11 +40,12 @@ class gameObject():
   
 
 class spriteObject(gameObject):
-    def __init__(self,id,offset,sprite,layer=1,parent="world",):
-        super().__init__(id,offset,layer,parent)
+    def __init__(self,id,rotation,offset,sprite,layer=1,parent="world",):
+        super().__init__(id,rotation,offset,layer,parent)
         self.sprite = sprite
     def render(self):
-        screen.blit(self.sprite,(super().getPos()[0]-self.sprite.get_width()/2,screen.get_height()-super().getPos()[1]-self.sprite.get_height()/2))
+        sprite = pygame.transform.rotate(self.sprite,self.rotation)
+        screen.blit(sprite,(self.getPos()[0]-sprite.get_width()/2,screen.get_height()-self.getPos()[1]-sprite.get_height()/2))
 
 def render():
     screen.fill((0,0,0))
@@ -76,7 +80,7 @@ def init():
     global objects
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-    objects.append(spriteObject("test",[100,100],pygame.image.load("test.jpeg").convert()))
+    objects.append(spriteObject("test",0,[100,100],pygame.image.load("test.png").convert()))
 
 def engineMain():
     render()
@@ -94,5 +98,9 @@ def main():
         if keyPressed(K_DOWN): 
             objects[getObject("test")].offset[1]-=5 
         if keyPressed(K_RIGHT):
-            objects[getObject("test")].offset[0]+=5 
+            objects[getObject("test")].offset[0]+=5
+        if keyPressed(K_q):
+            objects[getObject("test")].rotation+=5
+        if keyPressed(K_e):
+            objects[getObject("test")].rotation-=5
 main()
