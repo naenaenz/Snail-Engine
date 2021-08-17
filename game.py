@@ -1,3 +1,4 @@
+import math
 import pygame
 from pygame.locals import (
     K_UP,
@@ -11,20 +12,22 @@ from pygame.locals import (
     QUIT
 )
 
-
+#Initialise objects list
 objects = []
 
+#Returns the list index of an object given its id
 def getObject(id):
     for objectid in range(len(objects)):
         if objects[objectid].id == id:
             return objectid
     return -1
 
+#Basic object class
 class gameObject():
-    def __init__(self,id,rotation,offset,layer=1,parent="world"):
+    def __init__(self,id,rotation,scale,offset,parent="world"):
         self.id = id
         self.rotation = rotation
-        self.layer = layer
+        self.scale = scale
         self.parent = parent
         self.offset = offset
     def getPos(self):
@@ -36,56 +39,72 @@ class gameObject():
                 self.parent = "world"
                 return self.offset
             else:
-                return self.offset+objects[parentid].getPos()
-  
+                parentPos=objects[parentid].getPos()
+                return [self.offset[0]+parentPos[0],self.offset[1]+parentPos[1]] 
 
+#Sprite object class
 class spriteObject(gameObject):
-    def __init__(self,id,rotation,offset,sprite,layer=1,parent="world",):
-        super().__init__(id,rotation,offset,layer,parent)
+    def __init__(self,id,rotation,scale,offset,sprite,parent="world"):
+        super().__init__(id,rotation,scale,offset,parent)
         self.sprite = sprite
     def render(self):
-        sprite = pygame.transform.rotate(self.sprite,self.rotation)
+        sprite = pygame.transform.rotate(pygame.transform.scale(self.sprite,(self.sprite.get_width()*self.scale[0],self.sprite.get_height()*self.scale[1])),self.rotation).convert_alpha()
         screen.blit(sprite,(self.getPos()[0]-sprite.get_width()/2,screen.get_height()-self.getPos()[1]-sprite.get_height()/2))
 
+#Renders all objects
 def render():
-    screen.fill((0,0,0))
+    screen.fill((255,0,0))
     for object in objects:
         if isinstance(object,spriteObject):
             object.render()
-    pygame.display.update()
+    pygame.display.flip()
 
+#Iterates through the event keys and returns which ones were pressed
 def handleEvents(keys):
     events = [False for i in keys]
     for event in pygame.event.get():
-        # Did the user hit a key?
+        #Did the user hit a key?
         if event.type == KEYDOWN:
-            # Was it the Escape key? If so, quit.
+            #Was it the Escape key? If so, quit.
             if event.key == K_ESCAPE:
                 pygame.quit()
             for keyID in range(len(keys)):
                 if event.key == keys[keyID]:
                     events[keyID] = True
-        # Did the user click the window close button? If so, quit.
+        #Did the user click the window close button? If so, quit.
         elif event.type == QUIT:
             pygame.quit()
     return events
 
+#Returns if a key is pressed
 def keyPressed(key):
     return(pygame.key.get_pressed()[key])
 
 screen = ""
 
+#Initialise pygame
 def init():
     global screen
     global objects
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-    objects.append(spriteObject("test",0,[100,100],pygame.image.load("test.png").convert()))
+    objects.append(spriteObject("test",0,[1,2],[100,100],pygame.image.load_extended("test.png")))
+    objects.append(spriteObject("aeo",-45,[1,1],[30,30],pygame.image.load_extended("test.png"),"test")) 
 
+#Initialise time variable
+time = 0
+
+#Main loop function
 def engineMain():
+    global time
+    time = pygame.time.get_ticks()
     render()
-    pygame.time.delay(16)
+    timeTemp = pygame.time.get_ticks()
+    #60hz, has some screen tearing
+    pygame.time.delay(math.floor(1000/60-(timeTemp-time)))
+    time = timeTemp
 
+#Main game function
 def main():
     init()
     while True:
@@ -103,4 +122,5 @@ def main():
             objects[getObject("test")].rotation+=5
         if keyPressed(K_e):
             objects[getObject("test")].rotation-=5
+
 main()
