@@ -1,4 +1,5 @@
 import math
+import copy
 import pygame
 from pygame.locals import (
     K_UP,
@@ -32,15 +33,37 @@ class gameObject():
         self.offset = offset
     def getPos(self):
         if(self.parent == "world"):
-            return self.offset
+            return [*self.offset]
         else:
             parentid = getObject(self.parent)
             if parentid == -1:
                 self.parent = "world"
-                return self.offset
+                return [*self.offset]
             else:
                 parentPos=objects[parentid].getPos()
-                return [self.offset[0]+parentPos[0],self.offset[1]+parentPos[1]] 
+                return [self.offset[0]+parentPos[0],self.offset[1]+parentPos[1]]
+    def getScale(self):
+        if(self.parent == "world"):
+            return [*self.scale]
+        else:
+            parentid = getObject(self.parent)
+            if parentid == -1:
+                self.parent = "world"
+                return [*self.scale]
+            else:
+                parentScale=objects[parentid].getScale()
+                return [self.scale[0]*parentScale[0],self.scale[1]*parentScale[1]]
+    def getRot(self):
+        if(self.parent == "world"):
+            return self.rotation
+        else:
+            parentid = getObject(self.parent)
+            if parentid == -1:
+                self.parent = "world"
+                return self.rotation
+            else:
+                parentRot=objects[parentid].getRot()
+                return self.rotation+parentRot
 
 #Sprite object class
 class spriteObject(gameObject):
@@ -48,8 +71,25 @@ class spriteObject(gameObject):
         super().__init__(id,rotation,scale,offset,parent)
         self.sprite = sprite
     def render(self):
-        sprite = pygame.transform.rotate(pygame.transform.scale(self.sprite,(self.sprite.get_width()*self.scale[0],self.sprite.get_height()*self.scale[1])),self.rotation).convert_alpha()
-        screen.blit(sprite,(self.getPos()[0]-sprite.get_width()/2,screen.get_height()-self.getPos()[1]-sprite.get_height()/2))
+        pos = self.getPos()
+        print(pos, self.getPos(), self.offset)
+        sprite = self.sprite
+        #scale
+        scale = self.getScale()
+        pos[0]*=scale[0]
+        pos[1]*=scale[1]
+        sprite = pygame.transform.scale(sprite,(math.floor(self.sprite.get_width()*scale[0]),math.floor(self.sprite.get_height()*scale[1])))
+        #rotate
+        parentRot = objects[getObject(self.parent)].getRot()
+        rotation = self.getRot()
+        tempPos = [*pos]
+        #tempPos=[100,100]
+        print(pos, self.getPos(), self.offset)
+        pos[0] = math.cos(parentRot)*tempPos[0]+math.sin(parentRot)*tempPos[1]
+        pos[1] = math.cos(parentRot)*tempPos[1]+math.sin(parentRot)*tempPos[0]
+        pygame.transform.rotate(sprite,rotation).convert_alpha()
+        print(pos, self.getPos(), self.offset)
+        screen.blit(sprite,(pos[0]-sprite.get_width()/2,screen.get_height()-pos[1]-sprite.get_height()/2))
 
 #Renders all objects
 def render():
@@ -88,8 +128,8 @@ def init():
     global objects
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-    objects.append(spriteObject("test",0,[1,2],[100,100],pygame.image.load_extended("test.png")))
-    objects.append(spriteObject("aeo",-45,[1,1],[30,30],pygame.image.load_extended("test.png"),"test")) 
+    objects.append(spriteObject("test",0,[1,1],[100,100],pygame.image.load_extended("test.png")))
+    objects.append(spriteObject("aeo",-45,[1,1],[0,64],pygame.image.load_extended("test.png"),"test")) 
 
 #Initialise time variable
 time = 0
