@@ -71,24 +71,32 @@ class spriteObject(gameObject):
         super().__init__(id,rotation,scale,offset,parent)
         self.sprite = sprite
     def render(self):
-        pos = self.getPos()
-        print(pos, self.getPos(), self.offset)
+        pos = [0,0]
+        parentID = getObject(self.parent)
+        if parentID != -1:
+            pos = objects[parentID].getPos()
+        localPos = [*self.offset]
         sprite = self.sprite
         #scale
         scale = self.getScale()
+        localScale = [*self.scale]
         pos[0]*=scale[0]
         pos[1]*=scale[1]
+        localPos[0]*=localScale[0]
+        localPos[1]*=localScale[1] 
         sprite = pygame.transform.scale(sprite,(math.floor(self.sprite.get_width()*scale[0]),math.floor(self.sprite.get_height()*scale[1])))
         #rotate
-        parentRot = objects[getObject(self.parent)].getRot()
+        parentRot = 0
+        parentID = getObject(self.parent)
+        if parentID != -1:
+            parentRot = objects[parentID].getRot()
         rotation = self.getRot()
-        tempPos = [*pos]
-        #tempPos=[100,100]
-        print(pos, self.getPos(), self.offset)
-        pos[0] = math.cos(parentRot)*tempPos[0]+math.sin(parentRot)*tempPos[1]
-        pos[1] = math.cos(parentRot)*tempPos[1]+math.sin(parentRot)*tempPos[0]
-        pygame.transform.rotate(sprite,rotation).convert_alpha()
-        print(pos, self.getPos(), self.offset)
+        tempPos = [*localPos]
+        localPos[0] = math.cos(math.radians(parentRot))*tempPos[0]+math.sin(math.radians(parentRot))*tempPos[1]
+        localPos[1] = math.cos(math.radians(parentRot))*tempPos[1]+math.sin(math.radians(parentRot))*tempPos[1]
+        pos[0]+=localPos[0]
+        pos[1]+=localPos[1]
+        sprite = pygame.transform.rotate(sprite,rotation).convert_alpha()
         screen.blit(sprite,(pos[0]-sprite.get_width()/2,screen.get_height()-pos[1]-sprite.get_height()/2))
 
 #Renders all objects
